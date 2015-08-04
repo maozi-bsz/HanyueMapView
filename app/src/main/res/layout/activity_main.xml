@@ -1,0 +1,60 @@
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <view
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        class="android.support.v4.widget.DrawerLayout"
+        android:id="@+id/main_drawer">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <RadioGroup
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:orientation="horizontal"
+                android:id="@+id/main_view_radio">
+
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="输入模式"
+                    android:id="@+id/radioButton"
+                    android:layout_weight="1"
+                    android:checked="true" />
+
+                <RadioButton
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:text="显示模式"
+                    android:id="@+id/radioButton2"
+                    android:layout_weight="1"
+                    android:checked="false" />
+            </RadioGroup>
+
+            <FrameLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_alignParentTop="true"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_above="@+id/main_view_radio"
+                android:id="@+id/main_fragment_content"></FrameLayout>
+        </RelativeLayout>
+        <ListView
+            android:id="@+id/left_drawer"
+            android:layout_width="240dp"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:background="#ffffff"
+            android:choiceMode="singleChoice"
+            android:divider="#ffeeeeee"
+            android:dividerHeight="1px" />
+    </view>
+</merge>
