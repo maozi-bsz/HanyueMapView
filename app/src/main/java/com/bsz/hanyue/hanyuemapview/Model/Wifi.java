@@ -23,6 +23,7 @@ public class Wifi {
     int frequency;
     int distance;
     int floor;
+    long date;
 
     public int get_id() {
         return _id;
@@ -80,6 +81,14 @@ public class Wifi {
         this.floor = floor;
     }
 
+    public long getDate() {
+        return date;
+    }
+
+    public void setDate(long date) {
+        this.date = date;
+    }
+
     @Override
     public String toString() {
         return "Wifi{" +
@@ -90,6 +99,7 @@ public class Wifi {
                 ", frequency=" + frequency +
                 ", distance=" + distance +
                 ", floor=" + floor +
+                ", date=" + date +
                 '}';
     }
 }

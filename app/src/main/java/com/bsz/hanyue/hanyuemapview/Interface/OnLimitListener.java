@@ -1,4 +1,4 @@
-package com.bsz.hanyue.hanyuemapview.Utils;
+package com.bsz.hanyue.hanyuemapview.Interface;
 
 /**
  * Created by hanyue on 2015/7/24.

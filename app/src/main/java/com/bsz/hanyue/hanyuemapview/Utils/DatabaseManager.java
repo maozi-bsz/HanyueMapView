@@ -27,17 +27,7 @@ public class DatabaseManager {
 
     public void add(List<Wifi> wifis) {
         for (Wifi wifi : wifis) {
-            ContentValues contentValues = new ContentValues();
-            contentValues.put("bssid", wifi.getBssID());
-            contentValues.put("level", wifi.getLevel());
-            contentValues.put("frequency", wifi.getFrequency());
-            contentValues.put("name", wifi.getName());
-            if (wifi.getDistance() == 0) {
-                database.insert(SHEET1, null, contentValues);
-            } else {
-                contentValues.put("distance", wifi.getDistance());
-                database.insert(SHEET2, null, contentValues);
-            }
+            add(wifi);
         }
     }
 
@@ -47,6 +37,7 @@ public class DatabaseManager {
         contentValues.put("level", wifi.getLevel());
         contentValues.put("frequency", wifi.getFrequency());
         contentValues.put("name", wifi.getName());
+        contentValues.put("date", wifi.getDate());
         if (wifi.getDistance() == 0) {
             database.insert(SHEET1, null, contentValues);
         } else {
@@ -61,7 +52,7 @@ public class DatabaseManager {
 
     public List<String> getAllPreBSSID() {
         List<String> bssIDs = new ArrayList<>();
-        String queryString = "SELECT bssid FROM prewifi";
+        String queryString = "SELECT bssid FROM "+SHEET1;
         Cursor c = database.rawQuery(queryString, null);
         while (c.moveToNext()) {
             String bssID = c.getString(c.getColumnIndex("bssid"));
@@ -74,7 +65,7 @@ public class DatabaseManager {
     public List<Wifi> getPreWifisByBSSID(String bssID) {
         ArrayList<Wifi> wifis = new ArrayList<>();
         String[] attributes = new String[]{bssID};
-        String queryString = "SELECT * FROM prewifi WHERE bssid=?";
+        String queryString = "SELECT * FROM "+SHEET1+" WHERE bssid=?";
         Cursor c = database.rawQuery(queryString, attributes);
         while (c.moveToNext()) {
             Wifi wifi = new Wifi();
@@ -83,6 +74,7 @@ public class DatabaseManager {
             wifi.setLevel(c.getInt(c.getColumnIndex("level")));
             wifi.setFrequency(c.getInt(c.getColumnIndex("frequency")));
             wifi.setName(c.getString(c.getColumnIndex("name")));
+            wifi.setDate(c.getLong(c.getColumnIndex("date")));
             wifis.add(wifi);
         }
         c.close();
@@ -92,7 +84,7 @@ public class DatabaseManager {
     public List<Wifi> getWifisByBSSID(String bssID) {
         ArrayList<Wifi> wifis = new ArrayList<>();
         String[] attributes = new String[]{bssID};
-        String queryString = "SELECT * FROM prewifi WHERE bssid=?";
+        String queryString = "SELECT * FROM "+SHEET2+" WHERE bssid=?";
         Cursor c = database.rawQuery(queryString, attributes);
         while (c.moveToNext()) {
             Wifi wifi = new Wifi();
@@ -101,49 +93,39 @@ public class DatabaseManager {
             wifi.setLevel(c.getInt(c.getColumnIndex("level")));
             wifi.setFrequency(c.getInt(c.getColumnIndex("frequency")));
             wifi.setName(c.getString(c.getColumnIndex("name")));
+            wifi.setDistance(c.getInt(c.getColumnIndex("distance")));
+            wifi.setDate(c.getLong(c.getColumnIndex("date")));
             wifis.add(wifi);
         }
         c.close();
         return wifis;
     }
 
-    public List<Wifi> getWifisByBSSIDAndLevel(Wifi oWifi) {
-        ArrayList<Wifi> wifis = new ArrayList<>();
-        String queryString = null;
+    public Wifi getWifisByBSSIDAndLevel(Wifi oWifi) {
+        Wifi wifi = new Wifi();
         String[] attributes = new String[]{oWifi.getBssID(), String.valueOf(oWifi.getLevel())};
-        queryString = "SELECT * FROM wifi WHERE bssid=? AND level>? ORDER BY level DESC";
+        String queryString = "SELECT * FROM "+SHEET2+" WHERE bssid=? AND level>? ORDER BY level DESC LIMIT 1";
         Cursor c = database.rawQuery(queryString, attributes);
         while (c.moveToNext()) {
-            Wifi wifi = new Wifi();
             wifi.set_id(c.getInt(c.getColumnIndex("_id")));
             wifi.setBssID(c.getString(c.getColumnIndex("bssid")));
             wifi.setLevel(c.getInt(c.getColumnIndex("level")));
             wifi.setFrequency(c.getInt(c.getColumnIndex("frequency")));
             wifi.setDistance(c.getInt(c.getColumnIndex("distance")));
             wifi.setName(c.getString(c.getColumnIndex("name")));
-            wifis.add(wifi);
+            wifi.setDate(c.getLong(c.getColumnIndex("date")));
         }
         c.close();
-        return wifis;
+        return wifi;
     }
 
     public List<Wifi> getWifisByBSSIDAndLevel(List<Wifi> oWifis) {
         ArrayList<Wifi> wifis = new ArrayList<>();
-        for (Wifi oWifi:oWifis) {
-            String[] attributes = new String[]{oWifi.getBssID(), String.valueOf(oWifi.getLevel())};
-            String queryString = "SELECT * FROM wifi WHERE bssid=? AND level>? ORDER BY level DESC";
-            Cursor c = database.rawQuery(queryString, attributes);
-            while (c.moveToNext()) {
-                Wifi wifi = new Wifi();
-                wifi.set_id(c.getInt(c.getColumnIndex("_id")));
-                wifi.setBssID(c.getString(c.getColumnIndex("bssid")));
-                wifi.setLevel(c.getInt(c.getColumnIndex("level")));
-                wifi.setFrequency(c.getInt(c.getColumnIndex("frequency")));
-                wifi.setDistance(c.getInt(c.getColumnIndex("distance")));
-                wifi.setName(c.getString(c.getColumnIndex("name")));
+        for (Wifi oWifi : oWifis) {
+            Wifi wifi = getWifisByBSSIDAndLevel(oWifi);
+            if (!(wifi.getBssID().isEmpty())){
                 wifis.add(wifi);
             }
-            c.close();
         }
         return wifis;
     }

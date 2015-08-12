@@ -10,27 +10,29 @@ import android.net.wifi.WifiManager;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.bsz.hanyue.hanyuemapview.Interface.OnGotWifiResultListener;
 import com.bsz.hanyue.hanyuemapview.Model.Wifi;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 /**
- * Created by hanyue on 2015/7/23.
+ * Created by hanyue on 2015/7/23
  */
 public class WifiScanManager {
 
     private Activity activity;
     private WifiManager wifiManager;
-    private List<OnGetWifiResultListener> getWifiResultListeners;
+    private List<OnGotWifiResultListener> gotWifiResultListeners;
     private int state = 2;
 
     public WifiScanManager(Context context) {
         this.activity = (Activity) context;
         wifiManager = (WifiManager) activity.getSystemService(Context.WIFI_SERVICE);
-        getWifiResultListeners = new ArrayList<>();
+        gotWifiResultListeners = new ArrayList<>();
     }
 
     private Timer timer;
@@ -57,8 +59,8 @@ public class WifiScanManager {
                         List<ScanResult> scanResultList = wifiManager.getScanResults();
                         deleteLowerWifi(scanResultList);
                         sortResult(scanResultList);
-                        for (OnGetWifiResultListener getWifiResultListener : getWifiResultListeners) {
-                            getWifiResultListener.getScanResult(changeType(scanResultList));
+                        for (OnGotWifiResultListener gotWifiResultListener : gotWifiResultListeners) {
+                            gotWifiResultListener.getScanResult(changeType(scanResultList));
                         }
                     }
                 });
@@ -81,8 +83,8 @@ public class WifiScanManager {
                 List<ScanResult> scanResultList = wifiManager.getScanResults();
                 deleteLowerWifi(scanResultList);
                 sortResult(scanResultList);
-                for (OnGetWifiResultListener getWifiResultListener:getWifiResultListeners){
-                    getWifiResultListener.getScanResult(changeType(scanResultList));
+                for (OnGotWifiResultListener gotWifiResultListener:gotWifiResultListeners){
+                    gotWifiResultListener.getScanResult(changeType(scanResultList));
                 }
                 wifiManager.startScan();
             }
@@ -159,6 +161,7 @@ public class WifiScanManager {
             wifi.setLevel(scanResults.get(i).level);
             wifi.setFrequency(scanResults.get(i).frequency);
             wifi.setName(scanResults.get(i).SSID);
+            wifi.setDate(new Date().getTime());
             wifis.add(wifi);
         }
         return wifis;
@@ -172,12 +175,16 @@ public class WifiScanManager {
         activity.unregisterReceiver(broadcastReceiver);
     }
 
-    public void setOnGetWifiResultListener(OnGetWifiResultListener getWifiResultListener) {
-        this.getWifiResultListeners.add(getWifiResultListener);
+    public void setOnGotWifiResultListener(OnGotWifiResultListener gotWifiResultListener) {
+        this.gotWifiResultListeners.add(gotWifiResultListener);
     }
 
-    public void removeListener(OnGetWifiResultListener getWifiResultListener){
-        this.getWifiResultListeners.remove(getWifiResultListener);
+    public void removeListener(OnGotWifiResultListener getWifiResultListener){
+        this.gotWifiResultListeners.remove(getWifiResultListener);
+    }
+
+    public Activity getActivity() {
+        return activity;
     }
 
 }

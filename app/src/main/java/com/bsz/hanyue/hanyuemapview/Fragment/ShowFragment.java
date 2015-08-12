@@ -1,5 +1,6 @@
 package com.bsz.hanyue.hanyuemapview.Fragment;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.net.Uri;
@@ -31,6 +32,10 @@ public class ShowFragment extends Fragment {
 
     private DatabaseManager databaseManager;
 
+    public ShowFragment(){
+    }
+
+    @SuppressLint("ValidFragment")
     public ShowFragment(Context context) {
         // Required empty public constructor
         isRun = false;

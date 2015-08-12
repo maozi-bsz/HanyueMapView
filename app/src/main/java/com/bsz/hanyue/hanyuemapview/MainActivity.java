@@ -1,12 +1,6 @@
 package com.bsz.hanyue.hanyuemapview;
 
 import android.app.Activity;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.ScanResult;
-import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
@@ -18,31 +12,30 @@ import android.widget.RadioGroup;
 
 import com.bsz.hanyue.hanyuemapview.Fragment.InputFragment;
 import com.bsz.hanyue.hanyuemapview.Fragment.ShowFragment;
+import com.bsz.hanyue.hanyuemapview.Interface.OnGotWifiResultListener;
 import com.bsz.hanyue.hanyuemapview.Model.Wifi;
 import com.bsz.hanyue.hanyuemapview.UI.DrawerAdapter;
 import com.bsz.hanyue.hanyuemapview.UI.FragmentTabAdapter;
 import com.bsz.hanyue.hanyuemapview.UI.FragmentTabAdapter.OnRgsExtraCheckedChangedListener;
 import com.bsz.hanyue.hanyuemapview.Utils.DatabaseManager;
-import com.bsz.hanyue.hanyuemapview.Utils.OnGetWifiResultListener;
-import com.bsz.hanyue.hanyuemapview.Utils.OnLimitListener;
+import com.bsz.hanyue.hanyuemapview.Interface.OnLimitListener;
 import com.bsz.hanyue.hanyuemapview.Utils.ScanLimitModelManager;
 import com.bsz.hanyue.hanyuemapview.Utils.WifiScanManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class MainActivity extends FragmentActivity {
 
     private Activity activity = this;
-    private DrawerLayout drawerLayout;
-    private ListView drawerList;
     private View lastView;
     private int count;
 
+    private DatabaseManager databaseManager;
+
     private void initDrawerMenu() {
-        drawerLayout = (DrawerLayout) findViewById(R.id.main_drawer);
-        drawerList = (ListView) findViewById(R.id.left_drawer);
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.main_drawer);
+        ListView drawerList = (ListView) findViewById(R.id.left_drawer);
         final DrawerAdapter drawerAdapter = new DrawerAdapter(activity);
         drawerList.setAdapter(drawerAdapter);
         drawerLayout.setDrawerListener(new DrawerLayout.DrawerListener() {
@@ -144,10 +137,17 @@ public class MainActivity extends FragmentActivity {
 
     private void initScanManager() {
         scanManager = new WifiScanManager(this);
-        scanManager.setOnGetWifiResultListener(new OnGetWifiResultListener() {
+        scanManager.setOnGotWifiResultListener(new OnGotWifiResultListener() {
             @Override
             public void getScanResult(List<Wifi> wifis) {
                 databaseManager.add(wifis);
+                List<String> wifiBSSID = getWifiInDatabase();
+                List<List<Wifi>> wifiLists = new ArrayList<>();
+                for (String string : wifiBSSID) {
+                    List<Wifi> wifiList1 = databaseManager.getPreWifisByBSSID(string);
+                    wifiLists.add(wifiList1);
+                }
+                inputFragment.setWifis(wifiLists);
             }
         });
     }
@@ -155,13 +155,13 @@ public class MainActivity extends FragmentActivity {
     private ScanLimitModelManager scanLimitModelManager;
 
     private void initScanLimitManager() {
-        scanLimitModelManager = new ScanLimitModelManager(activity, scanManager, databaseManager);
+        scanLimitModelManager = new ScanLimitModelManager(scanManager, databaseManager);
         scanLimitModelManager.setOnLimitListener(new OnLimitListener() {
             @Override
             public void onLimit() {
-                inputFragment.setWifis(getAverageWifis());
+//                inputFragment.setWifis(getAverageWifis());
                 showFragment.setWifis(getAverageWifis());
-                databaseManager.clearPreWifi();
+//                databaseManager.clearPreWifi();
             }
         });
     }
@@ -182,7 +182,7 @@ public class MainActivity extends FragmentActivity {
         for (int i = 0; i < allBssids.size(); i++) {
             boolean flag = true;
             for (int j = 0; j < bssids.size(); j++) {
-                if (bssids.get(j) == allBssids.get(i)) {
+                if (bssids.get(j).equals(allBssids.get(i))) {
                     flag = false;
                 }
             }
@@ -198,13 +198,11 @@ public class MainActivity extends FragmentActivity {
         for (int i = 0; i < wifis.size(); i++) {
             sub += wifis.get(i).getLevel();
         }
-        int averageLevel = sub/wifis.size();
+        int averageLevel = sub / wifis.size();
         Wifi wifi = wifis.get(0);
         wifi.setLevel(averageLevel);
         return wifi;
     }
-
-    private DatabaseManager databaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -231,6 +229,7 @@ public class MainActivity extends FragmentActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        scanManager.stop();
         databaseManager.closeDatabase();
     }
 }

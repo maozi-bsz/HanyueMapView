@@ -19,9 +19,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE IF NOT EXISTS wifi"+
-        "(_id INTEGER PRIMARY KEY AUTOINCREMENT, bssid VARCHAR, level INTEGER, frequency INTEGER, distance INTEGER, name VARCHAR)");
+        "(_id INTEGER PRIMARY KEY AUTOINCREMENT, bssid VARCHAR, level INTEGER, frequency INTEGER, distance INTEGER, name VARCHAR, date INTEGER)");
         db.execSQL("CREATE TABLE IF NOT EXISTS prewifi"+
-                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, bssid VARCHAR, level INTEGER, frequency INTEGER, name VARCHAR)");
+                "(_id INTEGER PRIMARY KEY AUTOINCREMENT, bssid VARCHAR, level INTEGER, frequency INTEGER, name VARCHAR, date INTEGER)");
     }
 
     @Override
